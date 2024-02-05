@@ -23,7 +23,7 @@ from langchain.embeddings.huggingface import HuggingFaceEmbeddings
 
 
 # OpenAI API key
-os.environ['OPENAI_API_KEY'] = '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'
+os.environ['OPENAI_API_KEY'] = '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'
 llm = OpenAI(temperature=0.1, model="gpt-3.5-turbo-1106")
 
 # Fetching custom embedding model
