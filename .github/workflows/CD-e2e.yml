@@ -28,18 +28,16 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Debug
-        run: |
-          pwd
-          ls -la
-
       - name: Determine Docker tag
         id: docker-tag
         run: |
           if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
             current_version=${{ vars.RELEASE_VERSION }}
-            new_version=$(echo "${current_version} + 0.01" | bc | awk '{printf "%.2f", $0}')
-            echo "DOCKER_TAG=latest_v${new_version}" >> $GITHUB_ENV
+            # Use bc for floating-point arithmetic
+            new_version=$(echo "${current_version} + 0.01" | bc)
+            # Round to two decimal places
+            new_version=$(printf "%.2f" "${new_version}")
+            echo "DOCKER_TAG=latest:${new_version}" >> $GITHUB_ENV
             echo "${new_version}" >> $GITHUB_ENV
           else
             branch_name=$(echo "${{ github.ref }}" | awk -F/ '{print $3}')
