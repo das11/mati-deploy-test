@@ -37,7 +37,7 @@ jobs:
         id: docker-tag
         run: |
           if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-            current_version=${{ env.DOCKER_VERSION }}
+            current_version=${{ vars.RELEASE_VERSION }}
             new_version=$(echo "${current_version} + 0.01" | bc | awk '{printf "%.2f", $0}')
             echo "DOCKER_TAG=latest_v${new_version}" >> $GITHUB_ENV
             echo "${new_version}" >> $GITHUB_ENV
