@@ -31,7 +31,7 @@ jobs:
       - name: Determine Docker tag
         id: docker-tag
         run: |
-           if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
             # Increment version by 1
             current_version=$(cat version.txt)
             new_version=$((current_version + 1))
