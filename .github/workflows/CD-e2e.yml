@@ -32,11 +32,15 @@ jobs:
         id: docker-tag
         run: |
           if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-            current_version=${{ vars.RELEASE_VERSION }}
-            # Use node.js for floating-point arithmetic
-            new_version=$(node -e "console.log((${current_version} + 0.01).toFixed(2))")
-            echo "DOCKER_TAG=latest:${new_version}" >> $GITHUB_ENV
-            echo "${new_version}" >> $GITHUB_ENV
+            # Extract version from the pull request description
+            pull_request_description="${{ github.event.pull_request.body }}"
+            version=$(echo "$pull_request_description" | grep -oP 'Version: \K[0-9.]+')
+            if [ -z "$version" ]; then
+              # If no version found, use a default
+              version="1.0"
+            fi
+            echo "DOCKER_TAG=latest:${version}" >> $GITHUB_ENV
+            echo "${version}" >> $GITHUB_ENV
           else
             branch_name=$(echo "${{ github.ref }}" | awk -F/ '{print $3}')
             echo "DOCKER_TAG=dev_v${branch_name}" >> $GITHUB_ENV
