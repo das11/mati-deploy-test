@@ -35,12 +35,10 @@ jobs:
             # Extract version from the pull request description
             pull_request_description="${{ github.event.pull_request.body }}"
             version=$(echo "$pull_request_description" | grep -oP 'Version: \K[0-9.]+')
-
             if [ -z "$version" ]; then
               # If no version found, use a default
               version="1.0"
             fi
-
             echo "DOCKER_TAG=latest:${version}" >> $GITHUB_ENV
             echo "${version}" >> $GITHUB_ENV
           else
