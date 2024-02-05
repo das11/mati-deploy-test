@@ -6,7 +6,7 @@ on:
       - "refs/tags/*"
 
 jobs:
-  mati-e2e:
+  mati_e2e:
     runs-on: ubuntu-latest
     steps:
       - name: Clear Space
