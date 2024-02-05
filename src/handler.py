@@ -10,6 +10,7 @@ from llama_index import StorageContext, load_index_from_storage
 from llama_index.vector_stores import PineconeVectorStore
 
 import os
+from dotenv import load_dotenv
 
 # Service Context dependencies
 from llama_index import set_global_service_context
@@ -22,8 +23,11 @@ from llama_index.embeddings import LangchainEmbedding
 from langchain.embeddings.huggingface import HuggingFaceEmbeddings
 
 
+load_dotenv()
+openai_api_key = os.getenv("OPENAI_API_KEY")
+
 # OpenAI API key
-os.environ['OPENAI_API_KEY'] = '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'
+os.environ['OPENAI_API_KEY'] = openai_api_key
 llm = OpenAI(temperature=0.1, model="gpt-3.5-turbo-1106")
 
 # Fetching custom embedding model
