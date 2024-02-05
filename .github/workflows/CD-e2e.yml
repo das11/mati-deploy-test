@@ -39,11 +39,11 @@ jobs:
           if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
             current_version=${{ env.DOCKER_VERSION }}
             new_version=$(echo "${current_version} + 0.01" | bc | awk '{printf "%.2f", $0}')
-            echo "DOCKER_TAG=latest:${new_version}" >> $GITHUB_ENV
+            echo "DOCKER_TAG=latest_v${new_version}" >> $GITHUB_ENV
             echo "${new_version}" >> $GITHUB_ENV
           else
             branch_name=$(echo "${{ github.ref }}" | awk -F/ '{print $3}')
-            echo "DOCKER_TAG=dev:${branch_name}" >> $GITHUB_ENV
+            echo "DOCKER_TAG=dev_v${branch_name}" >> $GITHUB_ENV
           fi
 
       - name: Build and push
