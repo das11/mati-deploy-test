@@ -44,8 +44,9 @@ jobs:
       
       - name: Check project directory
         run: |
-          pwd
-          ls -l
+          ls
+          cd ../ 
+          ls
 
       - name: Build and push
         uses: docker/build-push-action@v4
