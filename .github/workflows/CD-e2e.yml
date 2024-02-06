@@ -48,5 +48,6 @@ jobs:
           context: .
           file : ./Dockerfile
           push: true
-          build-args: ${{ secrets.OPENAI_API_KEY }}
+          build-args: |
+            ${{ secrets.OPENAI_API_KEY }}
           tags: ${{ vars.DOCKERHUB_REPO }}/${{ vars.DOCKERHUB_IMG }}:${{ env.DOCKER_TAG }}
