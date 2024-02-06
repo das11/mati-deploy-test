@@ -1,4 +1,4 @@
-name: CI | Test Node Handler
+name: CI | Test Serverless Node Handler
 
 on:
   push:
