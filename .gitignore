@@ -160,3 +160,5 @@ cython_debug/
 #.idea/
 
 .env
+key.py
+decr.py

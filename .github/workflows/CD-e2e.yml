@@ -1,9 +1,5 @@
 name: CD | Test End-to-End
 
-
-env:
-  OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY}}
-
 on:
   push:
     branches-ignore:
@@ -12,6 +8,10 @@ on:
 jobs:
   mati_e2e:
     runs-on: ubuntu-latest
+
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY}}
+    
     steps:
       - name: Clear Space
         run: |
@@ -46,4 +46,6 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           push: true
+          build-args: |
+            ${{ secrets.OPENAI_API_KEY }}
           tags: ${{ vars.DOCKERHUB_REPO }}/${{ vars.DOCKERHUB_IMG }}:${{ env.DOCKER_TAG }}

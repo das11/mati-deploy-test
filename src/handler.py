@@ -23,11 +23,11 @@ from llama_index.embeddings import LangchainEmbedding
 from langchain.embeddings.huggingface import HuggingFaceEmbeddings
 
 
-load_dotenv()
-openai_api_key = os.getenv("OPENAI_API_KEY")
-
 # OpenAI API key
-os.environ['OPENAI_API_KEY'] = openai_api_key
+load_dotenv()
+os.environ['OPENAI_API_KEY'] = os.getenv("OPENAI_API_KEY")
+
+# LLM
 llm = OpenAI(temperature=0.1, model="gpt-3.5-turbo-1106")
 
 # Fetching custom embedding model
