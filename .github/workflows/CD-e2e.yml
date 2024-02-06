@@ -51,7 +51,6 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
-          context: .
           push: true
           build-args: |
             ${{ secrets.OPENAI_API_KEY }}
