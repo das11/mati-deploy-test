@@ -32,7 +32,9 @@ llm = OpenAI(temperature=0.1, model="gpt-3.5-turbo-1106")
 
 # Fetching custom embedding model
 embeddings=LangchainEmbedding(
-    HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+    HuggingFaceEmbeddings(
+        model_name="all-MiniLM-L6-v2",
+        cache_folder="../embeddingModelCache")
     # HuggingFaceEmbeddings(model_name = "sentence-transformers/all-mpnet-base-v2")
 )
 
