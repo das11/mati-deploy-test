@@ -64,7 +64,7 @@ def build_index(pinecone):
 
     pinecone_index = pinecone.Index("mati-index")
 
-    vector_store = PineconeVectorStore(pinecone_index = pinecone_index, namespace="openai-3.5-1106")
+    vector_store = PineconeVectorStore(pinecone_index = pinecone_index, namespace="collection_engine_1")
     index = VectorStoreIndex.from_vector_store(vector_store = vector_store)
 
     return index
