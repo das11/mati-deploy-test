@@ -7,6 +7,8 @@
 
 runpod==1.5.2
 pinecone-client
-llama_index
+llama_index==0.10.4
 sentence_transformers
 langchain
+llama-index-embeddings-langchain
+llama-index-vector-stores-pinecone
