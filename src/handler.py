@@ -1,22 +1,22 @@
 import runpod
 
 from pinecone import Pinecone, PodSpec, ServerlessSpec
-from llama_index.vector_stores import PineconeVectorStore
-from llama_index.llms import OpenAI
+from llama_index.vector_stores.pinecone import PineconeVectorStore
+from llama_index.llms.openai import OpenAI
 
 # VectorStore dependencies 
-from llama_index import VectorStoreIndex
-from llama_index import StorageContext, load_index_from_storage
+from llama_index.core import VectorStoreIndex
+from llama_index.core import StorageContext, load_index_from_storage
 from llama_index.vector_stores import PineconeVectorStore
 
 import os
 
 # Service Context dependencies
-from llama_index import set_global_service_context
-from llama_index import ServiceContext
+from llama_index.core import set_global_service_context
+from llama_index.core import ServiceContext
 
 # Embeddings wrapper
-from llama_index.embeddings import LangchainEmbedding
+from llama_index.embeddings.langchain import LangchainEmbedding
 
 # HF embeddings - To represent document chunks
 from langchain.embeddings.huggingface import HuggingFaceEmbeddings

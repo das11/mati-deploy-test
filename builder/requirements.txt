@@ -10,3 +10,5 @@ pinecone-client
 llama_index
 sentence_transformers
 langchain
+llama-index-embeddings-langchain
+llama-index-vector-stores-pinecone
