@@ -7,7 +7,7 @@
 
 runpod==1.5.2
 pinecone-client
-llama_index==0.10.4
+llama_index==0.10.3
 sentence_transformers
 langchain
 llama-index-embeddings-langchain
