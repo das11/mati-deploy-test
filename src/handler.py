@@ -68,7 +68,7 @@ def build_index(pinecone):
 
     return index
 
-def handler(job):
+def generator_handler(job):
     """ Handler function that will be used to process jobs. """
     job_input = job['input']
     prompt = job_input.get('prompt')
@@ -81,12 +81,15 @@ def handler(job):
 
     query = f"{prompt} Tell me in detail"
 
-    response = query_engine.query(query)
-    print(response)
+    # response = query_engine.query(query)
+    # print(response)
 
-    return f"Hello!! \n\n Response - {response}"
+    # return f"\n\n Response - {response}"
+
+    yield st_query_engine.query(query)
 
 
 runpod.serverless.start({
-    "handler": handler
+    "handler": generator_handler,
+    "return_aggregate_stream": True
 })
