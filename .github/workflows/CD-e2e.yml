@@ -5,6 +5,7 @@ on:
   push:
     branches-ignore:
       - "refs/tags/*"
+      - "repo"
 
 jobs:
   mati_e2e:
