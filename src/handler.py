@@ -87,4 +87,6 @@ def handler(job):
     return f"Hello!! \n\n Response - {response}"
 
 
-runpod.serverless.start({"handler": handler})
+runpod.serverless.start({
+    "handler": handler
+})
