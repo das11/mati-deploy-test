@@ -2,9 +2,8 @@
 
 <h1>Template | Worker</h1>
 
-[![CI | Test Handler](https://github.com/runpod-workers/worker-template/actions/workflows/CI-test_handler.yml/badge.svg)](https://github.com/runpod-workers/worker-template/actions/workflows/CI-test_handler.yml)
+[![CD | E2E Build](https://github.com/das11/mati-deploy-test/actions/workflows/CD-e2e.yml/badge.svg)](https://github.com/runpod-workers/worker-template/actions/workflows/CD-e2e.yml/badge.svg)
 &nbsp;
-[![CD | Build-Test-Release](https://github.com/runpod-workers/worker-template/actions/workflows/build-test-release.yml/badge.svg)](https://github.com/runpod-workers/worker-template/actions/workflows/build-test-release.yml)
 
 🚀 | A simple worker that can be used as a starting point to build your own custom RunPod Endpoint API worker.
 </div>

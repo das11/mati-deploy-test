@@ -34,7 +34,6 @@ embeddings=LangchainEmbedding(
     HuggingFaceEmbeddings(
         model_name="all-MiniLM-L6-v2",
         cache_folder="../embeddingModelCache")
-    # HuggingFaceEmbeddings(model_name = "sentence-transformers/all-mpnet-base-v2")
 )
 
 # Creating new Service Context and setting it to GLOBAL
