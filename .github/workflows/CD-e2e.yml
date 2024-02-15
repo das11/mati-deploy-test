@@ -6,6 +6,8 @@ on:
     branches-ignore:
       - "refs/tags/*"
       - "repo"
+      - "dev"
+      - "stg"
 
 jobs:
   mati_e2e:
