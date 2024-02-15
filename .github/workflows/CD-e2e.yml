@@ -8,6 +8,7 @@ on:
       - "repo"
       - "dev"
       - "stg"
+      - "prod_state"
 
 jobs:
   mati_e2e:
