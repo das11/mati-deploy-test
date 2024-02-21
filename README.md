@@ -1,23 +1,19 @@
 <div align="center">
 
-<h1>Template | Worker</h1>
+<h1>Mati | Inference Node</h1>
 
-[![CI | Test Handler](https://github.com/runpod-workers/worker-template/actions/workflows/CI-test_handler.yml/badge.svg)](https://github.com/runpod-workers/worker-template/actions/workflows/CI-test_handler.yml)
+[![CD | E2E Build](https://github.com/das11/mati-deploy-test/actions/workflows/CD-e2e.yml/badge.svg)](https://github.com/runpod-workers/worker-template/actions/workflows/CD-e2e.yml/badge.svg)
 &nbsp;
-[![CD | Build-Test-Release](https://github.com/runpod-workers/worker-template/actions/workflows/build-test-release.yml/badge.svg)](https://github.com/runpod-workers/worker-template/actions/workflows/build-test-release.yml)
 
-🚀 | A simple worker that can be used as a starting point to build your own custom RunPod Endpoint API worker.
+🚀 | Mati's serverless inference node worker
 </div>
 
-## 📖 | Getting Started
+## 📖 | Basics
 
-1. Clone this repository.
-2. (Optional) Add DockerHub credentials to GitHub Secrets.
-3. Add your code to the `src` directory.
-4. Update the `handler.py` file to load models and process requests.
-5. Add any dependencies to the `requirements.txt` file.
-6. Add any other build time scripts to the`builder` directory, for example, downloading models.
-7. Update the `Dockerfile` to include any additional dependencies.
+1. Branch :`prod_state` -> Stores the abstract latest changes. Does not get packaged into Docker images.
+2. Branch : `dev` -> Dev state. Does not get packaged into Docker images.
+3. Branch : `stg`-> Stg state. Does not get packaged into Docker images.
+4. Releases
 
 ### ⚙️ | CI/CD (GitHub Actions)
 
@@ -50,17 +46,6 @@ Additionally, the following need to be added as GitHub actions variables:
 
 The `CD-docker_dev.yml` file will build the image and push it to the `dev` tag, while the `CD-docker_release.yml` file will build the image on releases and tag it with the release version.
 
-The `CI-test_worker.yml` file will test the worker using the input provided by the `--test_input` argument when calling the file containing your handler. Be sure to update this workflow to install any dependencies you need to run your tests.
-
-## Example Input
-
-```json
-{
-    "input": {
-        "name": "John Doe"
-    }
-}
-```
 
 ## 💡 | Best Practices
 
@@ -72,4 +57,4 @@ If using the input validation utility from the runpod python package, create a `
 
 ## 🔗 | Links
 
-🐳 [Docker Container](https://hub.docker.com/r/runpod/serverless-hello-world)
+🐳 [Docker Container]() - TBA
