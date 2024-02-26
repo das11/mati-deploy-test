@@ -2,6 +2,8 @@ import runpod
 
 from pinecone import Pinecone, PodSpec, ServerlessSpec
 from llama_index.llms.openai import OpenAI
+from llama_index.core.prompts import PromptTemplate
+
 
 # VectorStore dependencies 
 from llama_index.core import VectorStoreIndex
@@ -68,6 +70,20 @@ def build_index(pinecone):
 
     return index
 
+def prompt_template_model():
+    aris_qa_template_base_str = (
+        "Context information is below.\n"
+        "---------------------\n"
+        "{context_str}\n"
+        "---------------------\n"
+        "Given the context information and not prior knowledge, answer the query in detail and in bullets or list. You are an excellent financial analyst named Mati.\n"
+        "Query: {query_str}\n"
+        "Answer: "
+    )
+    aris_qa_template_base = PromptTemplate(aris_qa_template_base_str)
+
+    return aris_qa_template_base
+
 def handler(job):
     """ Handler function that will be used to process jobs. """
     job_input = job['input']
@@ -76,10 +92,12 @@ def handler(job):
     pinecone = pinecone_init()
     index = build_index(pinecone)
 
-    query_engine = index.as_query_engine()
+    aris_prompting_model = prompt_template_model()
+
+    query_engine = index.as_query_engine(text_qa_template = aris_prompting_model)
     st_query_engine = index.as_query_engine(streaming = True)
 
-    query = f"{prompt} Tell me in detail"
+    query = f"{prompt}"
 
     response = query_engine.query(query)
     print(response)
