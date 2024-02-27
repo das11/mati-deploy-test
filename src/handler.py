@@ -28,6 +28,9 @@ from langchain.embeddings.huggingface import HuggingFaceEmbeddings
 load_dotenv()
 os.environ['OPENAI_API_KEY'] = os.getenv("OPENAI_API_KEY")
 
+secret = os.getenv("TEST")
+print(f"Secret : {secret} ")
+
 # LLM
 llm = OpenAI(temperature=0.1, model="gpt-3.5-turbo-1106")
 
