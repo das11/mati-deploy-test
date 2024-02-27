@@ -30,6 +30,7 @@ os.environ['OPENAI_API_KEY'] = os.getenv("OPENAI_API_KEY")
 
 secret = os.environ.get("TEST")
 print(f"Secret : {secret} ")
+print(os.environ)
 
 # LLM
 llm = OpenAI(temperature=0.1, model="gpt-3.5-turbo-1106")
