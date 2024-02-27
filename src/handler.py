@@ -28,7 +28,7 @@ from langchain.embeddings.huggingface import HuggingFaceEmbeddings
 load_dotenv()
 os.environ['OPENAI_API_KEY'] = os.getenv("OPENAI_API_KEY")
 
-secret = os.getenv("TEST")
+secret = os.environ.get("TEST")
 print(f"Secret : {secret} ")
 
 # LLM
