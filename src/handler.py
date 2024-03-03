@@ -28,9 +28,10 @@ from langchain.embeddings.huggingface import HuggingFaceEmbeddings
 load_dotenv()
 os.environ['OPENAI_API_KEY'] = os.getenv("OPENAI_API_KEY")
 
-secret = os.environ.get("TEST")
-print(f"Secret : {secret} ")
-print(os.environ)
+# Printing secrets to debug
+RP_SECRET_NAMESPACE = os.environ.get("NAMESPACE")
+print(f"Secret : {RP_SECRET_NAMESPACE} ")
+print(f"OS env : {os.environ}")
 
 # LLM
 llm = OpenAI(temperature=0.1, model="gpt-3.5-turbo-1106")
@@ -40,7 +41,6 @@ embeddings=LangchainEmbedding(
     HuggingFaceEmbeddings(
         model_name="all-MiniLM-L6-v2",
         cache_folder="../embeddingModelCache")
-    # HuggingFaceEmbeddings(model_name = "sentence-transformers/all-mpnet-base-v2")
 )
 
 # Creating new Service Context and setting it to GLOBAL
@@ -69,7 +69,9 @@ def build_index(pinecone):
 
     pinecone_index = pinecone.Index("mati-index")
 
-    vector_store = PineconeVectorStore(pinecone_index = pinecone_index, namespace="collection_engine_1")
+    namespace = RP_SECRET_NAMESPACE if RP_SECRET_NAMESPACE != None else "collection_engine_1"
+
+    vector_store = PineconeVectorStore(pinecone_index = pinecone_index, namespace=namespace)
     index = VectorStoreIndex.from_vector_store(vector_store = vector_store)
 
     return index
@@ -86,7 +88,22 @@ def prompt_template_model():
     )
     aris_qa_template_base = PromptTemplate(aris_qa_template_base_str)
 
-    return aris_qa_template_base
+    aris_summary_template_str = (
+        "Context information is below.\n"
+        "---------------------\n"
+        "{context_str}\n"
+        "---------------------\n"
+        "You are an excellent financial analyst named Mati.\n"
+        "Given the context information and not prior knowledge, answer the query.\n"
+        "Follow these instructions to form the bullets : \n"
+        "1. Bullet #1 should include - Mention the financial advisor, strategy and tax sensitivity\n"
+        "2. Bullet #2 should include - Mention the Total market value, Cash level and Tracking Error\n"
+        "Query: {query_str}\n"
+        "Answer :"
+    )
+    aris_summary_template = PromptTemplate(aris_summary_template_str)
+
+    return aris_summary_template
 
 def handler(job):
     """ Handler function that will be used to process jobs. """
@@ -96,17 +113,14 @@ def handler(job):
     pinecone = pinecone_init()
     index = build_index(pinecone)
 
-    aris_prompting_model = prompt_template_model()
-
-    query_engine = index.as_query_engine(text_qa_template = aris_prompting_model)
-    st_query_engine = index.as_query_engine(streaming = True)
+    aris_summary_prompting_model = prompt_template_model()
+    summary_query_engine = index.as_query_engine(text_qa_template = aris_summary_prompting_model)
 
     query = f"{prompt}"
-
-    response = query_engine.query(query)
+    response = summary_query_engine.query(query)
     print(response)
 
-    return f"Hello!! \n\n Response - {response}"
+    return f"Hey!\n{response}"
 
 
 runpod.serverless.start({"handler": handler})
