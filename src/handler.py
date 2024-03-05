@@ -117,8 +117,9 @@ def build_query_engines(index):
         "2. The final line of code should be a Python expression that can be called with the `eval()` function.\n"
         "3. The code should represent a solution to the query.\n"
         "4. Consider partial matches if relevant\n"
-        "5. PRINT ONLY THE EXPRESSION.\n"
-        "6. Do not quote the expression.\n" 
+        "5. Take column names only from these - account_name, account_id, internal_security_id, ticker, security_name, iso_country_code, purchase_date, shares, cost_per_share, original_purchase_price, holding_date\n"
+        "6. PRINT ONLY THE EXPRESSION.\n"
+        "7. Do not quote the expression.\n" 
     )
     holdings = fetch_dataframes()
     aris_holding_query_engine = PandasQueryEngine(df=holdings, verbose=True, instruction_str=instruction_str, llm=llm, synthesize_response=True)
