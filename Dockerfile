@@ -25,6 +25,9 @@ RUN python3.11 -m pip install --upgrade pip && \
 ARG OPENAI_API_KEY
 ENV OPENAI_API_KEY=${OPENAI_API_KEY}
 
+ARG PINECONE_API_KEY
+ENV PINECONE_API_KEY=${PINECONE_API_KEY}
+
 # Add src files (Worker Template)
 ADD src .
 

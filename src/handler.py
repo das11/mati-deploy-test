@@ -23,7 +23,10 @@ from llama_index.embeddings.langchain import LangchainEmbedding
 # HF embeddings - To represent document chunks
 from langchain.embeddings.huggingface import HuggingFaceEmbeddings
 
+# ARIS Prompting model
+import aris_prompting 
 
+#################################################################################################################################################
 # OpenAI API key
 load_dotenv()
 os.environ['OPENAI_API_KEY'] = os.getenv("OPENAI_API_KEY")
@@ -53,14 +56,15 @@ service_context = ServiceContext.from_defaults(
 # Setting the service context
 set_global_service_context(service_context)
 
+#################################################################################################################################################
 
 
 # If your handler runs inference on a model, load the model here.
 # You will want models to be loaded into memory before starting serverless.
 
 def pinecone_init():
-    api_key = "e80bd265-1ff4-4ec3-8f03-b7929e7b1011"
-    pinecone = Pinecone(api_key=api_key)
+    pinecone_api_key = os.getenv("PINECONE_API_KEY")
+    pinecone = Pinecone(api_key=pinecone_api_key)
 
     return pinecone
 
@@ -68,7 +72,6 @@ def build_index(pinecone):
     # Connect Pinecone vectorstore with existing embeddings
 
     pinecone_index = pinecone.Index("mati-index")
-
     namespace = RP_SECRET_NAMESPACE if RP_SECRET_NAMESPACE != None else "collection_engine_1"
 
     vector_store = PineconeVectorStore(pinecone_index = pinecone_index, namespace=namespace)
@@ -76,34 +79,80 @@ def build_index(pinecone):
 
     return index
 
-def prompt_template_model():
-    aris_qa_template_base_str = (
-        "Context information is below.\n"
-        "---------------------\n"
-        "{context_str}\n"
-        "---------------------\n"
-        "Given the context information and not prior knowledge, answer the query in detail and in bullets or list. You are an excellent financial analyst named Mati.\n"
-        "Query: {query_str}\n"
-        "Answer: "
-    )
-    aris_qa_template_base = PromptTemplate(aris_qa_template_base_str)
+def fetch_dataframes():
+    import pandas as pd
 
-    aris_summary_template_str = (
-        "Context information is below.\n"
-        "---------------------\n"
-        "{context_str}\n"
-        "---------------------\n"
-        "You are an excellent financial analyst named Mati.\n"
-        "Given the context information and not prior knowledge, answer the query.\n"
-        "Follow these instructions to form the bullets : \n"
-        "1. Bullet #1 should include - Mention the financial advisor, strategy and tax sensitivity\n"
-        "2. Bullet #2 should include - Mention the Total market value, Cash level and Tracking Error\n"
-        "Query: {query_str}\n"
-        "Answer :"
-    )
-    aris_summary_template = PromptTemplate(aris_summary_template_str)
+    holdings_parquet_url = "https://project-mati-nd-cloudsync.s3.us-east-2.amazonaws.com/holdings.parquet.gzip"
+    holdings_df = pd.read_parquet(holdings_parquet_url)
 
-    return aris_summary_template
+    return holdings_df 
+
+def build_query_engines(index):
+    from llama_index.core.query_engine import PandasQueryEngine
+
+    # ARIS Base
+    aris_query_engine = index.as_query_engine(
+        similarity_top_k = 2,
+        text_qa_template= aris_prompting.aris_qa_template_base
+    )
+
+    # ARIS Summary
+    aris_summary_query_engine = index.as_query_engine(
+        # response_mode = "compact",/
+        similarity_top_k = 2,
+        text_qa_template=aris_prompting.aris_summary_template,
+        streaming = True
+    )
+
+    # ARIS Holdings 
+    instruction_str = (
+        "1. Convert the query to executable Python code using Pandas.\n"
+        "2. The final line of code should be a Python expression that can be called with the `eval()` function.\n"
+        "3. The code should represent a solution to the query.\n"
+        "4. Consider partial matches if relevant\n"
+        "5. PRINT ONLY THE EXPRESSION.\n"
+        "6. Do not quote the expression.\n" 
+    )
+    holdings = fetch_dataframes()
+    aris_holding_query_engine = PandasQueryEngine(df=holdings, verbose=True, instruction_str=instruction_str, llm=llm, synthesize_response=True)
+
+    return aris_query_engine, aris_summary_query_engine, aris_holding_query_engine
+
+def router_engine(index):
+    from llama_index.core.query_engine import RouterQueryEngine
+    from llama_index.core.selectors import LLMSingleSelector, LLMMultiSelector
+    from llama_index.core.selectors import (
+        PydanticMultiSelector,
+        PydanticSingleSelector,
+    )
+    from llama_index.core.tools import QueryEngineTool
+    import nest_asyncio
+
+    aris_query_engine ,aris_summary_query_engine, aris_holding_query_engine = build_query_engines(index)
+
+    holding_qe_tool = QueryEngineTool.from_defaults(
+        query_engine=aris_holding_query_engine,
+        description="Useful for shares or holding related questions for Accounts"
+    )
+    summary_qe_tool = QueryEngineTool.from_defaults(
+        query_engine=aris_summary_query_engine,
+        description="Useful for summarization questions related to the accounts.",
+    )
+    general_qe_tool = QueryEngineTool.from_defaults(
+        query_engine=aris_query_engine,
+        description="Useful for generic questions not involving summarization",
+    )
+
+    router_query_engine = RouterQueryEngine(
+        selector=PydanticSingleSelector.from_defaults(),
+        query_engine_tools=[
+            holding_qe_tool,
+            summary_qe_tool,
+            general_qe_tool,
+        ]
+    )
+
+    return router_query_engine
 
 def handler(job):
     """ Handler function that will be used to process jobs. """
@@ -113,11 +162,10 @@ def handler(job):
     pinecone = pinecone_init()
     index = build_index(pinecone)
 
-    aris_summary_prompting_model = prompt_template_model()
-    summary_query_engine = index.as_query_engine(text_qa_template = aris_summary_prompting_model)
+    router_query_engine = router_engine(index)
 
     query = f"{prompt}"
-    response = summary_query_engine.query(query)
+    response = router_query_engine.query(query)
     print(response)
 
     return f"Hey!\n{response}"

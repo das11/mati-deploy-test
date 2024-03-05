@@ -12,3 +12,4 @@ sentence_transformers
 langchain
 llama-index-embeddings-langchain
 llama-index-vector-stores-pinecone
+pandas
