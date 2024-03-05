@@ -13,3 +13,5 @@ langchain
 llama-index-embeddings-langchain
 llama-index-vector-stores-pinecone
 pandas
+pyarrow
+fastparquet
