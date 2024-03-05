@@ -32,8 +32,11 @@ load_dotenv()
 os.environ['OPENAI_API_KEY'] = os.getenv("OPENAI_API_KEY")
 os.environ['PINECONE_API_KEY'] = os.getenv("PINECONE_API_KEY")
 
-print(f"GETENV : {os.getenv("PINECONE_API_KEY")}")
-print(f"GETENV : {os.getenv("OPENAI_API_KEY")}")
+ge_p = os.getenv("PINECONE_API_KEY")
+ge_o = os.getenv("OPENAI_API_KEY")
+
+print(f"GETENV : {ge_p}")
+print(f"GETENV : {ge_o}")
 
 # Printing secrets to debug
 RP_SECRET_NAMESPACE = os.environ.get("NAMESPACE")
