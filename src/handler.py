@@ -30,6 +30,10 @@ import aris_prompting
 # OpenAI API key
 load_dotenv()
 os.environ['OPENAI_API_KEY'] = os.getenv("OPENAI_API_KEY")
+os.environ['PINECONE_API_KEY'] = os.getenv("PINECONE_API_KEY")
+
+print(f"GETENV : {os.getenv("PINECONE_API_KEY")}")
+print(f"GETENV : {os.getenv("OPENAI_API_KEY")}")
 
 # Printing secrets to debug
 RP_SECRET_NAMESPACE = os.environ.get("NAMESPACE")
@@ -63,7 +67,7 @@ set_global_service_context(service_context)
 # You will want models to be loaded into memory before starting serverless.
 
 def pinecone_init():
-    pinecone_api_key = os.getenv("PINECONE_API_KEY")
+    pinecone_api_key = os.environ["PINECONE_API_KEY"]
     pinecone = Pinecone(api_key=pinecone_api_key)
 
     return pinecone
