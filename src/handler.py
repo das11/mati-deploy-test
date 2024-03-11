@@ -48,6 +48,7 @@ print(f"GETENV : {ge_c}")
 RP_SECRET_NAMESPACE = os.environ.get("NAMESPACE")
 RP_SECRET_NAMESPACE_DOC_RESEARCH = os.environ.get("NAMESPACE_DOC_RESEARCH")
 print(f"Secret : {RP_SECRET_NAMESPACE} ")
+print(f"Secret : {RP_SECRET_NAMESPACE_DOC_RESEARCH} ")
 print(f"OS env : {os.environ}")
 
 # LLM
@@ -91,8 +92,8 @@ def build_index(pinecone):
     vector_store = PineconeVectorStore(pinecone_index = pinecone_index, namespace=namespace)
     index = VectorStoreIndex.from_vector_store(vector_store = vector_store)
 
-    namespace = RP_SECRET_NAMESPACE_DOC_RESEARCH if RP_SECRET_NAMESPACE_DOC_RESEARCH != None else "doc-research"
-    doc_research_vector_store = PineconeVectorStore(pinecone_index = pinecone_index, namespace=namespace)
+    doc_research_namespace = RP_SECRET_NAMESPACE_DOC_RESEARCH if RP_SECRET_NAMESPACE_DOC_RESEARCH != None else "doc-research"
+    doc_research_vector_store = PineconeVectorStore(pinecone_index = pinecone_index, namespace=doc_research_namespace)
     doc_reseaerch_index = VectorStoreIndex.from_vector_store(vector_store = vector_store)
 
     return index, doc_reseaerch_index
