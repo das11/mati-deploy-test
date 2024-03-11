@@ -54,4 +54,5 @@ jobs:
           build-args: |
             OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
             PINECONE_API_KEY=${{ secrets.PINECONE_API_KEY}}
+            COHERE_API_KEY=${{secrets.COHERE_API_KEY}}
           tags: ${{ vars.DOCKERHUB_REPO }}/${{ vars.DOCKERHUB_IMG }}:${{ env.DOCKER_TAG }}

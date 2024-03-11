@@ -15,3 +15,4 @@ llama-index-vector-stores-pinecone
 pandas
 pyarrow
 fastparquet
+llama-index-postprocessor-cohere-rerank

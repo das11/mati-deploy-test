@@ -23,6 +23,9 @@ from llama_index.embeddings.langchain import LangchainEmbedding
 # HF embeddings - To represent document chunks
 from langchain.embeddings.huggingface import HuggingFaceEmbeddings
 
+# Node preprocessors
+from llama_index.postprocessor.cohere_rerank import CohereRerank
+
 # ARIS Prompting model
 import aris_prompting 
 
@@ -31,6 +34,7 @@ import aris_prompting
 load_dotenv()
 os.environ['OPENAI_API_KEY'] = os.getenv("OPENAI_API_KEY")
 os.environ['PINECONE_API_KEY'] = os.getenv("PINECONE_API_KEY")
+os.environ['COHERE_API_KEY'] = os.getenv("COHERE_API_KEY")
 
 ge_p = os.getenv("PINECONE_API_KEY")
 ge_o = os.getenv("OPENAI_API_KEY")
@@ -40,6 +44,7 @@ print(f"GETENV : {ge_o}")
 
 # Printing secrets to debug
 RP_SECRET_NAMESPACE = os.environ.get("NAMESPACE")
+RP_SECRET_NAMESPACE_DOC_RESEARCH = os.environ.get("NAMESPACE_DOC_RESEARCH")
 print(f"Secret : {RP_SECRET_NAMESPACE} ")
 print(f"OS env : {os.environ}")
 
@@ -79,12 +84,16 @@ def build_index(pinecone):
     # Connect Pinecone vectorstore with existing embeddings
 
     pinecone_index = pinecone.Index("mati-index")
-    namespace = RP_SECRET_NAMESPACE if RP_SECRET_NAMESPACE != None else "collection_engine_1"
 
+    namespace = RP_SECRET_NAMESPACE if RP_SECRET_NAMESPACE != None else "collection_engine_1"
     vector_store = PineconeVectorStore(pinecone_index = pinecone_index, namespace=namespace)
     index = VectorStoreIndex.from_vector_store(vector_store = vector_store)
 
-    return index
+    namespace = RP_SECRET_NAMESPACE_DOC_RESEARCH if RP_SECRET_NAMESPACE_DOC_RESEARCH != None else "doc-research"
+    doc_research_vector_store = PineconeVectorStore(pinecone_index = pinecone_index, namespace=namespace)
+    doc_reseaerch_index = VectorStoreIndex.from_vector_store(vector_store = vector_store)
+
+    return index, doc_reseaerch_index
 
 def fetch_dataframes():
     import pandas as pd
@@ -94,7 +103,7 @@ def fetch_dataframes():
 
     return holdings_df 
 
-def build_query_engines(index):
+def build_query_engines(index, doc_research_index):
     from llama_index.core.query_engine import PandasQueryEngine
 
     # ARIS Base
@@ -124,9 +133,21 @@ def build_query_engines(index):
     holdings = fetch_dataframes()
     aris_holding_query_engine = PandasQueryEngine(df=holdings, verbose=True, instruction_str=instruction_str, llm=llm, synthesize_response=True)
 
-    return aris_query_engine, aris_summary_query_engine, aris_holding_query_engine
+    # Doc Research
+    cohere_api_key = os.environ["COHERE_API_KEY"]
+    cohere_rerank = CohereRerank(api_key=cohere_api_key, top_n=2)
 
-def router_engine(index):
+    doc_research_query_engine = doc_research_index.as_query_engine(
+        # response_mode = "compact",/
+        similarity_top_k = 10,
+        node_postprocessors = [cohere_rerank],
+        streaming = True
+    )
+
+
+    return aris_query_engine, aris_summary_query_engine, aris_holding_query_engine, doc_research_query_engine
+
+def router_engine(index, doc_research_index):
     from llama_index.core.query_engine import RouterQueryEngine
     from llama_index.core.selectors import LLMSingleSelector, LLMMultiSelector
     from llama_index.core.selectors import (
@@ -136,7 +157,7 @@ def router_engine(index):
     from llama_index.core.tools import QueryEngineTool
     import nest_asyncio
 
-    aris_query_engine ,aris_summary_query_engine, aris_holding_query_engine = build_query_engines(index)
+    aris_query_engine ,aris_summary_query_engine, aris_holding_query_engine, doc_research_query_engine = build_query_engines(index, doc_research_index)
 
     holding_qe_tool = QueryEngineTool.from_defaults(
         query_engine=aris_holding_query_engine,
@@ -150,6 +171,10 @@ def router_engine(index):
         query_engine=aris_query_engine,
         description="Useful for generic questions not involving summarization",
     )
+    doc_research_qe_tool = QueryEngineTool.from_defaults(
+        query_engine=doc_research_query_engine,
+        description="Useful for answering questions related to the Callan Institute pdfs. Also useful when asked about \"research\""
+    )
 
     router_query_engine = RouterQueryEngine(
         selector=PydanticSingleSelector.from_defaults(),
@@ -157,6 +182,7 @@ def router_engine(index):
             holding_qe_tool,
             summary_qe_tool,
             general_qe_tool,
+            doc_research_qe_tool
         ]
     )
 
@@ -168,9 +194,9 @@ def handler(job):
     prompt = job_input.get('prompt')
 
     pinecone = pinecone_init()
-    index = build_index(pinecone)
+    index, doc_research_index = build_index(pinecone)
 
-    router_query_engine = router_engine(index)
+    router_query_engine = router_engine(index, doc_research_index)
 
     query = f"{prompt}"
     response = router_query_engine.query(query)
