@@ -171,7 +171,7 @@ def router_engine(index, doc_research_index):
     )
     general_qe_tool = QueryEngineTool.from_defaults(
         query_engine=aris_query_engine,
-        description="Useful for generic questions not involving summarization",
+        description="Useful for generic questions regarding account holders or accounts",
     )
     doc_research_qe_tool = QueryEngineTool.from_defaults(
         query_engine=doc_research_query_engine,
