@@ -38,9 +38,11 @@ os.environ['COHERE_API_KEY'] = os.getenv("COHERE_API_KEY")
 
 ge_p = os.getenv("PINECONE_API_KEY")
 ge_o = os.getenv("OPENAI_API_KEY")
+ge_c = os.getenv("COHERE_API_KEY")
 
 print(f"GETENV : {ge_p}")
 print(f"GETENV : {ge_o}")
+print(f"GETENV : {ge_c}")
 
 # Printing secrets to debug
 RP_SECRET_NAMESPACE = os.environ.get("NAMESPACE")
@@ -108,7 +110,7 @@ def build_query_engines(index, doc_research_index):
 
     # ARIS Base
     aris_query_engine = index.as_query_engine(
-        similarity_top_k = 2,
+        similarity_top_k = 3,
         text_qa_template= aris_prompting.aris_qa_template_base
     )
 
