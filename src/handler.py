@@ -145,6 +145,7 @@ def build_query_engines(index, doc_research_index):
     doc_research_query_engine = doc_research_index.as_query_engine(
         # response_mode = "compact",/
         similarity_top_k = 10,
+        text_qa_template = aris_prompting.doc_research_template,
         node_postprocessors = [cohere_rerank],
         streaming = True
     )

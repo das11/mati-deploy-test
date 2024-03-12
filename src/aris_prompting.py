@@ -52,3 +52,17 @@ reranked_aris_summary_template_str = (
 )
 reranked_aris_summary_template = PromptTemplate(reranked_aris_summary_template_str)
 
+# Doc Reseaerch
+doc_research_template_str = (
+    "Context information is below.\n"
+    "---------------------\n"
+    "{context_str}\n"
+    "---------------------\n"
+    "Given the context information and not prior knowledge, answer the query in detail. You are an excellent financial analyst named Mati.\n"
+    "Query: {query_str}\n"
+    "Follow these instructions : \n"
+    "Strucure the response as a table if possible \n"
+    "If its not tabular then structure it multiple points \n"
+    "Answer: "
+)
+doc_research_template = PromptTemplate(doc_research_template_str)
