@@ -113,7 +113,7 @@ def build_query_engines(index, doc_research_index):
 
     # ARIS Base
     aris_query_engine = index.as_query_engine(
-        similarity_top_k = 3,
+        similarity_top_k = 5,
         text_qa_template= aris_prompting.aris_qa_template_base
     )
 
