@@ -162,7 +162,7 @@ def router_engine(index, doc_research_index):
     )
     summary_qe_tool = QueryEngineTool.from_defaults(
         query_engine=aris_summary_query_engine,
-        description="Useful for summarization questions related to the accounts.",
+        description="Useful for summarization questions related to the accounts. Especially when asked to summarize an account. ",
     )
     general_qe_tool = QueryEngineTool.from_defaults(
         query_engine=aris_query_engine,
