@@ -94,7 +94,7 @@ def build_index(pinecone):
 
     doc_research_namespace = RP_SECRET_NAMESPACE_DOC_RESEARCH if RP_SECRET_NAMESPACE_DOC_RESEARCH != None else "doc-research"
     doc_research_vector_store = PineconeVectorStore(pinecone_index = pinecone_index, namespace=doc_research_namespace)
-    doc_reseaerch_index = VectorStoreIndex.from_vector_store(vector_store = vector_store)
+    doc_reseaerch_index = VectorStoreIndex.from_vector_store(vector_store = doc_research_vector_store)
 
     return index, doc_reseaerch_index
 
