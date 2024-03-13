@@ -6,7 +6,6 @@
 
 from llama_index.core.prompts import PromptTemplate
 from llama_index.core import PromptTemplate
-import handler
 
 # Base ARIS Template
 aris_qa_template_base_str = (
@@ -91,7 +90,15 @@ pandas_prompt_str = (
     "Expression:"
 )
 
-holdings_df = handler.fetch_dataframes()
+def fetch_dataframes():
+    import pandas as pd
+
+    holdings_parquet_url = "https://project-mati-nd-cloudsync.s3.us-east-2.amazonaws.com/holdings.parquet.gzip"
+    holdings_df = pd.read_parquet(holdings_parquet_url)
+
+    return holdings_df 
+
+holdings_df = fetch_dataframes()
 holdings_qe_pandas_prompt = PromptTemplate(pandas_prompt_str).partial_format(
     instruction_str = holdings_qe_instruction_str, 
     df_str=holdings_df.head(5),
