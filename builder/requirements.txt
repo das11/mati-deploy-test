@@ -16,3 +16,5 @@ pandas
 pyarrow
 fastparquet
 llama-index-postprocessor-cohere-rerank
+promptlayer
+llama-index-callbacks-promptlayer

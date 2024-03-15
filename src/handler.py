@@ -16,6 +16,7 @@ from dotenv import load_dotenv
 # Service Context dependencies
 from llama_index.core import set_global_service_context
 from llama_index.core import ServiceContext
+from llama_index.core import set_global_handler
 
 # Embeddings wrapper
 from llama_index.embeddings.langchain import LangchainEmbedding
@@ -38,14 +39,17 @@ load_dotenv()
 os.environ['OPENAI_API_KEY'] = os.getenv("OPENAI_API_KEY")
 os.environ['PINECONE_API_KEY'] = os.getenv("PINECONE_API_KEY")
 os.environ['COHERE_API_KEY'] = os.getenv("COHERE_API_KEY")
+os.environ['PROMPTLAYER_API_KEY'] = os.getenv("PROMPTLAYER_API_KEY")
 
 ge_p = os.getenv("PINECONE_API_KEY")
 ge_o = os.getenv("OPENAI_API_KEY")
 ge_c = os.getenv("COHERE_API_KEY")
+ge_pl = os.getenv("PROMPTLAYER_API_KEY")
 
 print(f"GETENV : {ge_p}")
 print(f"GETENV : {ge_o}")
 print(f"GETENV : {ge_c}")
+print(f"GETENV : {ge_pl}")
 
 # Printing secrets to debug
 RP_SECRET_NAMESPACE = os.environ.get("NAMESPACE")
@@ -63,6 +67,9 @@ embeddings=LangchainEmbedding(
         model_name="all-MiniLM-L6-v2",
         cache_folder="../embeddingModelCache")
 )
+
+# Promptlayer handler
+set_global_handler("promptlayer", pl_tags=["aris-mati"])
 
 # Creating new Service Context and setting it to GLOBAL
 service_context = ServiceContext.from_defaults(
