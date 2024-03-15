@@ -29,6 +29,9 @@ from llama_index.postprocessor.cohere_rerank import CohereRerank
 # ARIS Prompting model
 import aris_prompting 
 
+# ARIS Source Context
+import source_context
+
 #################################################################################################################################################
 # OpenAI API key
 load_dotenv()
@@ -197,9 +200,12 @@ def handler(job):
 
     query = f"{prompt}"
     response = router_query_engine.query(query)
-    print(response)
+    sources = source_context.source_context(response)
 
-    return f"Hey!\n{response}"
+    inference = f"{response}\n{sources}"
+
+
+    return f"\n{inference}"
 
 
 runpod.serverless.start({"handler": handler})
