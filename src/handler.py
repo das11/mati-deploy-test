@@ -106,9 +106,13 @@ def build_index(pinecone):
     doc_research_vector_store = PineconeVectorStore(pinecone_index = pinecone_index, namespace=doc_research_namespace)
     doc_reseaerch_index = VectorStoreIndex.from_vector_store(vector_store = doc_research_vector_store)
 
+    lead_gen_vector_store = PineconeVectorStore(pinecone_index = pinecone_index, namespace="lead_gen_2")
+    lead_gen_index = VectorStoreIndex.from_vector_store(vector_store = lead_gen_vector_store)
+
+
     print(f"Namespces used : {namespace}, {doc_research_namespace}")
 
-    return index, doc_reseaerch_index
+    return index, doc_reseaerch_index, lead_gen_index
 
 def fetch_dataframes():
     import pandas as pd
@@ -151,10 +155,20 @@ def build_query_engines(index, doc_research_index):
         streaming = True
     )
 
+    # Lead Generation 
+    cohere_rerank_lead_gen = CohereRerank(api_key=cohere_api_key, top_n=2)
+    lead_gen_query_engine = lead_gen_index.as_query_engine(
+        # response_mode = "compact",/
+        similarity_top_k = 10,
+        text_qa_template = aris_prompting.lead_gen_template,
+        node_postprocessors = [cohere_rerank_lead_gen],
+        streaming = True
+    )
 
-    return aris_query_engine, aris_summary_query_engine, aris_holding_query_engine, doc_research_query_engine
 
-def router_engine(index, doc_research_index):
+    return aris_query_engine, aris_summary_query_engine, aris_holding_query_engine, doc_research_query_engine, lead_gen_query_engine
+
+def router_engine(index, doc_research_index, lead_gen_index):
     from llama_index.core.query_engine import RouterQueryEngine
     from llama_index.core.selectors import LLMSingleSelector, LLMMultiSelector
     from llama_index.core.selectors import (
@@ -164,7 +178,7 @@ def router_engine(index, doc_research_index):
     from llama_index.core.tools import QueryEngineTool
     import nest_asyncio
 
-    aris_query_engine ,aris_summary_query_engine, aris_holding_query_engine, doc_research_query_engine = build_query_engines(index, doc_research_index)
+    aris_query_engine ,aris_summary_query_engine, aris_holding_query_engine, doc_research_query_engine, lead_gen_query_engine = build_query_engines(index, doc_research_index, lead_gen_index)
 
     holding_qe_tool = QueryEngineTool.from_defaults(
         query_engine=aris_holding_query_engine,
@@ -183,13 +197,19 @@ def router_engine(index, doc_research_index):
         description="Useful for answering questions related to the Callan Institute pdfs. Also useful when asked about \"research\""
     )
 
+    lead_gen_qe_tool = QueryEngineTool.from_defaults(
+        query_engine=lead_gen_query_engine,
+        description="Useful for answering questions related to lead gen. Especially useful lead gen is mentioned."
+    )
+
     router_query_engine = RouterQueryEngine(
         selector=PydanticSingleSelector.from_defaults(),
         query_engine_tools=[
             holding_qe_tool,
             summary_qe_tool,
             general_qe_tool,
-            doc_research_qe_tool
+            doc_research_qe_tool,
+            lead_gen_qe_tool
         ]
     )
 
@@ -201,9 +221,9 @@ def handler(job):
     prompt = job_input.get('prompt')
 
     pinecone = pinecone_init()
-    index, doc_research_index = build_index(pinecone)
+    index, doc_research_index, lead_gen_index = build_index(pinecone)
 
-    router_query_engine = router_engine(index, doc_research_index)
+    router_query_engine = router_engine(index, doc_research_index, lead_gen_index)
 
     query = f"{prompt}"
     response = router_query_engine.query(query)

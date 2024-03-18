@@ -104,3 +104,17 @@ holdings_qe_pandas_prompt = PromptTemplate(pandas_prompt_str).partial_format(
     df_str=holdings_df.head(5),
     df_columns = list(holdings_df.columns)
 )
+
+
+
+# LEAD GEN Template
+lead_gen_template_str = (
+    "Context information is below.\n"
+    "---------------------\n"
+    "{context_str}\n"
+    "---------------------\n"
+    "Given the context information and not prior knowledge, answer the query in detail. You are an excellent financial analyst named Mati.\n"
+    "Query: {query_str}\n"
+    "Answer: "
+)
+lead_gen_template = PromptTemplate(lead_gen_template_str)
