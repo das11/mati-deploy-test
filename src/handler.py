@@ -122,7 +122,7 @@ def fetch_dataframes():
 
     return holdings_df 
 
-def build_query_engines(index, doc_research_index):
+def build_query_engines(index, doc_research_index, lead_gen_index):
     from llama_index.core.query_engine import PandasQueryEngine
 
     # ARIS Base
