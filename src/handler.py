@@ -156,10 +156,10 @@ def build_query_engines(index, doc_research_index, lead_gen_index):
     )
 
     # Lead Generation 
-    cohere_rerank_lead_gen = CohereRerank(api_key=cohere_api_key, top_n=2)
+    cohere_rerank_lead_gen = CohereRerank(api_key=cohere_api_key, top_n=3)
     lead_gen_query_engine = lead_gen_index.as_query_engine(
         # response_mode = "compact",/
-        similarity_top_k = 10,
+        similarity_top_k = 12,
         text_qa_template = aris_prompting.lead_gen_template,
         node_postprocessors = [cohere_rerank_lead_gen],
         streaming = True
