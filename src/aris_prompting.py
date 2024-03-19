@@ -114,6 +114,8 @@ lead_gen_template_str = (
     "{context_str}\n"
     "---------------------\n"
     "Given the context information and not prior knowledge, answer the query in detail. You are an excellent financial analyst named Mati.\n"
+    "Sructure the response in points, if possible\n"
+    "Do not give wrong information if it does not meet the criteria\n"
     "Query: {query_str}\n"
     "Answer: "
 )
