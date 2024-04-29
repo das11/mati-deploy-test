@@ -128,7 +128,7 @@ def fetch_dataframes():
 
     return holdings_df 
 
-def build_query_engines(index, doc_research_index, lead_gen_index):
+def build_query_engines(index, doc_research_index):
     from llama_index.core.query_engine import PandasQueryEngine
 
     # ARIS Base
@@ -162,16 +162,20 @@ def build_query_engines(index, doc_research_index, lead_gen_index):
     )
 
     # Lead Generation 
-    cohere_rerank_lead_gen = CohereRerank(api_key=cohere_api_key, top_n=2)
-    lead_gen_query_engine = lead_gen_index.as_query_engine(
-        # response_mode = "compact",/
-        similarity_top_k = 10,
-        text_qa_template = aris_prompting.lead_gen_template,
-        node_postprocessors = [cohere_rerank_lead_gen],
-        streaming = True
-    )
+    # cohere_rerank_lead_gen = CohereRerank(api_key=cohere_api_key, top_n=2)
+    # lead_gen_query_engine = lead_gen_index.as_query_engine(
+    #     # response_mode = "compact",/
+    #     similarity_top_k = 10,
+    #     text_qa_template = aris_prompting.lead_gen_template,
+    #     node_postprocessors = [cohere_rerank_lead_gen],
+    #     streaming = True
+    # )
 
-    return aris_query_engine, aris_summary_query_engine, aris_holding_query_engine, doc_research_query_engine, lead_gen_query_engine
+    # NOTE
+    # lead_gen QE build is passed over to lead_gen.py to accomodate cyclic QE_tools build
+    # will be triggered directly through build_query_engines()
+
+    return aris_query_engine, aris_summary_query_engine, aris_holding_query_engine, doc_research_query_engine
 
 def router_engine(index, doc_research_index, lead_gen_index):
     from llama_index.core.query_engine import RouterQueryEngine
@@ -202,10 +206,10 @@ def router_engine(index, doc_research_index, lead_gen_index):
         description="Useful for answering questions related to the Callan Institute pdfs. Also useful when asked about \"research\""
     )
 
-    lead_gen_qe_tool = QueryEngineTool.from_defaults(
-        query_engine=lead_gen_query_engine,
-        description="Useful for answering questions related to lead gen. Especially useful when lead gen is mentioned."
-    )
+    # lead_gen_qe_tool = QueryEngineTool.from_defaults(
+    #     query_engine=lead_gen_query_engine,
+    #     description="Useful for answering questions related to lead gen. Especially useful when lead gen is mentioned."
+    # )
     lead_gen_qe_tools = lead_gen.lead_gen_qe_tools(pinecone_init())
 
     all_qe_tools = holding_qe_tool + summary_qe_tool + general_qe_tool + doc_research_qe_tool + lead_gen_qe_tools
@@ -223,9 +227,9 @@ def handler(job):
     prompt = job_input.get('prompt')
 
     pinecone = pinecone_init()
-    index, doc_research_index, lead_gen_index = build_index(pinecone)
+    index, doc_research_index = build_index(pinecone)
 
-    router_query_engine = router_engine(index, doc_research_index, lead_gen_index)
+    router_query_engine = router_engine(index, doc_research_index)
 
     query = f"{prompt}"
     response = router_query_engine.query(query)
