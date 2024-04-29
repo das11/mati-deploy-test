@@ -177,7 +177,7 @@ def build_query_engines(index, doc_research_index):
 
     return aris_query_engine, aris_summary_query_engine, aris_holding_query_engine, doc_research_query_engine
 
-def router_engine(index, doc_research_index, lead_gen_index):
+def router_engine(index, doc_research_index):
     from llama_index.core.query_engine import RouterQueryEngine
     from llama_index.core.selectors import LLMSingleSelector, LLMMultiSelector
     from llama_index.core.selectors import (
