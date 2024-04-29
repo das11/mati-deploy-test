@@ -33,6 +33,9 @@ import aris_prompting
 # ARIS Source Context
 import source_context
 
+# Lead Gen
+import lead_gen
+
 #################################################################################################################################################
 # OpenAI API key
 load_dotenv()
@@ -106,13 +109,16 @@ def build_index(pinecone):
     doc_research_vector_store = PineconeVectorStore(pinecone_index = pinecone_index, namespace=doc_research_namespace)
     doc_reseaerch_index = VectorStoreIndex.from_vector_store(vector_store = doc_research_vector_store)
 
-    lead_gen_vector_store = PineconeVectorStore(pinecone_index = pinecone_index, namespace="lead_gen_2")
-    lead_gen_index = VectorStoreIndex.from_vector_store(vector_store = lead_gen_vector_store)
+    # lead_gen_vector_store = PineconeVectorStore(pinecone_index = pinecone_index, namespace="lead_gen_2")
+    # lead_gen_index = VectorStoreIndex.from_vector_store(vector_store = lead_gen_vector_store)
 
+    # NOTE
+    # lead_gen index build is passed over to lead_gen.py to accomodate cyclic index build
+    # will be triggered directly through build_query_engines()
 
     print(f"Namespces used : {namespace}, {doc_research_namespace}")
 
-    return index, doc_reseaerch_index, lead_gen_index
+    return index, doc_reseaerch_index
 
 def fetch_dataframes():
     import pandas as pd
@@ -165,7 +171,6 @@ def build_query_engines(index, doc_research_index, lead_gen_index):
         streaming = True
     )
 
-
     return aris_query_engine, aris_summary_query_engine, aris_holding_query_engine, doc_research_query_engine, lead_gen_query_engine
 
 def router_engine(index, doc_research_index, lead_gen_index):
@@ -201,16 +206,13 @@ def router_engine(index, doc_research_index, lead_gen_index):
         query_engine=lead_gen_query_engine,
         description="Useful for answering questions related to lead gen. Especially useful when lead gen is mentioned."
     )
+    lead_gen_qe_tools = lead_gen.lead_gen_qe_tools(pinecone_init())
+
+    all_qe_tools = holding_qe_tool + summary_qe_tool + general_qe_tool + doc_research_qe_tool + lead_gen_qe_tools
 
     router_query_engine = RouterQueryEngine(
         selector=PydanticSingleSelector.from_defaults(),
-        query_engine_tools=[
-            holding_qe_tool,
-            summary_qe_tool,
-            general_qe_tool,
-            doc_research_qe_tool,
-            lead_gen_qe_tool
-        ]
+        query_engine_tools=all_qe_tools
     )
 
     return router_query_engine
