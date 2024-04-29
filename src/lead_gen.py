@@ -12,7 +12,7 @@ def company_list_builder():
 # This creates a dummy dictionary of comapany_names without 
 # the Document object and used as a enumerated list for queryEngines 
 
-    with open("company_names.txt", "r") as file:
+    with open("./data_stage/lead_gen/company_names.txt", "r") as file:
         # Read all lines into a list
         lines = file.readlines()
 
