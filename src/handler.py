@@ -10,6 +10,9 @@ from llama_index.core import VectorStoreIndex
 from llama_index.core import StorageContext, load_index_from_storage
 from llama_index.vector_stores.pinecone import PineconeVectorStore
 
+# Pandas QE
+from llama_index.experimental.query_engine import PandasQueryEngine
+
 import os
 from dotenv import load_dotenv
 
@@ -129,8 +132,6 @@ def fetch_dataframes():
     return holdings_df 
 
 def build_query_engines(index, doc_research_index):
-    from llama_index.core.query_engine import PandasQueryEngine
-
     # ARIS Base
     aris_query_engine = index.as_query_engine(
         similarity_top_k = 5,
