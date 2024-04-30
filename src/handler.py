@@ -187,7 +187,7 @@ def router_engine(index, doc_research_index):
     from llama_index.core.tools import QueryEngineTool
     import nest_asyncio
 
-    aris_query_engine ,aris_summary_query_engine, aris_holding_query_engine, doc_research_query_engine, lead_gen_query_engine = build_query_engines(index, doc_research_index, lead_gen_index)
+    aris_query_engine ,aris_summary_query_engine, aris_holding_query_engine, doc_research_query_engine = build_query_engines(index, doc_research_index)
 
     holding_qe_tool = QueryEngineTool.from_defaults(
         query_engine=aris_holding_query_engine,
