@@ -211,7 +211,7 @@ def router_engine(index, doc_research_index):
     #     query_engine=lead_gen_query_engine,
     #     description="Useful for answering questions related to lead gen. Especially useful when lead gen is mentioned."
     # )
-    lead_gen_qe_tools = lead_gen.lead_gen_qe_tools(pinecone_init())
+    lead_gen_qe_tools = lead_gen.lead_gen_qe_tools(pinecone_init(), llm)
 
     all_qe_tools = holding_qe_tool + summary_qe_tool + general_qe_tool + doc_research_qe_tool + lead_gen_qe_tools
 

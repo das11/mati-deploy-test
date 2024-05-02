@@ -33,7 +33,7 @@ def company_list_builder():
 
     return company_names
 
-def lead_gen_qe_tools(pinecone):
+def lead_gen_qe_tools(pinecone, llm):
     company_names = company_list_builder()
 
     lead_gen_query_engine_tools = []
