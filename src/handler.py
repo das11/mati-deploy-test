@@ -75,7 +75,7 @@ embeddings=LangchainEmbedding(
 )
 
 # Promptlayer handler
-set_global_handler("promptlayer", pl_tags=["aris-mati"])
+# set_global_handler("promptlayer", pl_tags=["aris-mati"])
 
 # Creating new Service Context and setting it to GLOBAL
 service_context = ServiceContext.from_defaults(
