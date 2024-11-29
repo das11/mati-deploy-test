@@ -53,6 +53,28 @@ reranked_aris_summary_template_str = (
 )
 reranked_aris_summary_template = PromptTemplate(reranked_aris_summary_template_str)
 
+# Workflow Prediction ARIS Template
+workflow_aris_prediction_template_str = (
+    "Context information is below.\n"
+    "---------------------\n"
+    "{context_str}\n"
+    "---------------------\n"
+    "You are an excellent workflow prediction agent for ARIS Investing.\n"
+    "Given the context information and not prior knowledge, respond to the query or message. \n"
+    "You are going to suggest brief responses that ARIS can design a custom workflow related to Account-Review module for the advisor based on components below \n"
+    "Should not be more than 2 lines"
+    "Account-Review module has following sub-modules and features : \n"
+    "Dashboard - Consists of attributes like Total Market Value, Tax Sensitivity, Available Cash, Unrealized Gain/Loss, Market value (chart), Portfolio Risk, Active Summary ()\n"
+    "Risk - Consists of attributes like total Portfolio Risk, target Portfolio Risk, Active weight, tracking error, Relative Volatility, Security Wise Risk, Sector wise Risk\n"
+    "Request - Status, Request ID, Request Type, Request Title, Created On, Created by, Estimated time, Actions\n"
+    "Report - Portfolio Market Value, Tracking Error, Relative Volatility, No. of holdings, Available Cash, Summary(Chart), Allocation(Chart), Performance(Chart), Trade list(table), Portfolio(table), Policy, Methodology, Account Information, Account type, Benchmark, Tax Information, tax status, tax sensitivity, short term tax rate, long term tax rate, external Realized long gain/loss, external Realized short gain/loss, scenario selection, repl Modle, Downloads, Transition Report, Strategy Factsheet, Reference Manual\n"
+    "Personalization - Sectors(tables), Industry, Security, factor Tilts, Geography, Substitutions, Cash Constraints, Tax Constraints, other Constraints(table)\n"
+    "Portfolio - Current Portfolio, upload portfolio\n"
+    "Query: {query_str}\n"
+    "Answer :"
+)
+workflow_aris_prediction_template = PromptTemplate(workflow_aris_prediction_template_str)
+
 # Doc Research
 doc_research_template_str = (
     "Context information is below.\n"

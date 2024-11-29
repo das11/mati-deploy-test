@@ -161,6 +161,10 @@ def build_query_engines(index, doc_research_index):
         node_postprocessors = [cohere_rerank],
         streaming = True
     )
+    workflow_query_engine = index.as_query_engine(
+        similarity_top_k = 3,
+        text_qa_template = aris_prompting.workflow_aris_prediction_template,
+    )
 
     # Lead Generation 
     # cohere_rerank_lead_gen = CohereRerank(api_key=cohere_api_key, top_n=2)
@@ -176,7 +180,7 @@ def build_query_engines(index, doc_research_index):
     # lead_gen QE build is passed over to lead_gen.py to accomodate cyclic QE_tools build
     # will be triggered directly through build_query_engines()
 
-    return aris_query_engine, aris_summary_query_engine, aris_holding_query_engine, doc_research_query_engine
+    return aris_query_engine, aris_summary_query_engine, aris_holding_query_engine, doc_research_query_engine, workflow_query_engine
 
 def router_engine(index, doc_research_index):
     from llama_index.core.query_engine import RouterQueryEngine
@@ -188,7 +192,7 @@ def router_engine(index, doc_research_index):
     from llama_index.core.tools import QueryEngineTool
     import nest_asyncio
 
-    aris_query_engine ,aris_summary_query_engine, aris_holding_query_engine, doc_research_query_engine = build_query_engines(index, doc_research_index)
+    aris_query_engine, aris_summary_query_engine, aris_holding_query_engine, doc_research_query_engine, workflow_query_engine = build_query_engines(index, doc_research_index)
 
     holding_qe_tool = QueryEngineTool.from_defaults(
         query_engine=aris_holding_query_engine,
@@ -206,12 +210,17 @@ def router_engine(index, doc_research_index):
         query_engine=doc_research_query_engine,
         description="Useful for answering questions related to the Callan Institute pdfs. Also useful when asked about \"research\""
     )
+    workflow_qe_tool = QueryEngineTool.from_defaults(
+        query_engine=workflow_query_engine,
+        description="Useful for workflow related responses or feedback. Especially when Prediction Workflow is mentioned.",
+    )
 
     qe_tools = [
         holding_qe_tool,
         summary_qe_tool,
         general_qe_tool,
-        doc_research_qe_tool
+        doc_research_qe_tool,
+        workflow_qe_tool 
     ]
 
     # lead_gen_qe_tool = QueryEngineTool.from_defaults(
