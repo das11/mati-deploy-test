@@ -39,6 +39,9 @@ import source_context
 # Lead Gen
 import lead_gen
 
+# Summarization
+import summarization
+
 #################################################################################################################################################
 # OpenAI API key
 load_dotenv()
@@ -239,11 +242,7 @@ def router_engine(index, doc_research_index):
 
     return router_query_engine
 
-def handler(job):
-    """ Handler function that will be used to process jobs. """
-    job_input = job['input']
-    prompt = job_input.get('prompt')
-
+def standard_flow(prompt):
     pinecone = pinecone_init()
     index, doc_research_index = build_index(pinecone)
 
@@ -257,6 +256,41 @@ def handler(job):
 
 
     return f"\n{inference}"
+
+def summarization_flow(job_input):
+    pinecone = pinecone_init()
+    pinecone_index = pinecone.Index("policy-metadata")
+    
+    summarization.set_pinecone_index(pinecone_index)
+    summarization.set_embeddings_model(embeddings)
+    summarization.set_payload(job_input["summarization"])
+    summarization.set_llm(llm)
+    
+    summarization.main_loop()
+    return True
+    
+    
+
+def handler(job):
+    """ Handler function that will be used to process jobs. """
+    job_input = job['input']
+    
+    if isinstance(job_input, dict):
+        print("> Job input is a dictionary | Summarization flow")  
+        if "summarization" not in job_input:
+            raise ValueError("Job input must contain the key 'summarization'.")
+        
+        inference = summarization_flow(job_input)
+        return inference
+        
+    elif not isinstance(job_input, dict):
+        print("> Job input is not a dictionary | Standard flow")
+        prompt = job_input.get('prompt')
+        
+        inference = standard_flow(prompt)
+        return inference
+
+    
 
 
 runpod.serverless.start({"handler": handler})
