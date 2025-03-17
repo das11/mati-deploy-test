@@ -66,8 +66,8 @@ def parse_payload_data_json(payload):
         for scenario in account["scenarios"]:
             account_opt_map_id = scenario["accountOptMapId"]
             policy_data = json.loads(scenario["policyData"])  # Convert JSON string to list of dicts
+            
             feasibility_report = json.loads(scenario["feasibilityReport"])  # Convert JSON string to dict
-
             policy_check_data = [
                 {
                     "policy_code": policy["policyCode"],
@@ -77,10 +77,14 @@ def parse_payload_data_json(payload):
                 }
                 for policy in policy_data
             ]
-
+            
+            if "feedback" in scenario:
+                feedback = scenario["feedback"]
+            
             parsed_data[account_id][account_opt_map_id] = {
                 "policy_check_data": policy_check_data,
-                "feasibility_report": feasibility_report
+                "feasibility_report": feasibility_report,
+                "feedback" : feedback if "feedback" in scenario else None
             }
 
     return parsed_data
@@ -319,19 +323,19 @@ def record_feedback(summary: str, user_id: str, component_id: int, vote: int):
                                 "summary_text": [summary]})  # Store summary text
         feedback_df = pd.concat([feedback_df, new_row], ignore_index=True)
 
-def aggregate_feedback(user_id: str) -> dict:
+def aggregate_feedback(account_id: str, feedback_df: pd.DataFrame) -> dict:
     """Aggregate feedback across all sessions for a user."""
-    df = feedback_df[feedback_df["user_id"] == user_id]
+    df = feedback_df[feedback_df["user_id"] == account_id]
     
     aggregated = {}
     for _, row in df.iterrows():
         comp_id = int(row["component_id"])
         if comp_id in aggregated:
             # Aggregate score & count
-            aggregated[comp_id]["score"] = (aggregated[comp_id]["score"] * aggregated[comp_id]["count"] + row["score"] * row["count"]) / (aggregated[comp_id]["count"] + row["count"])
+            aggregated[comp_id]["score"] = (aggregated[comp_id]["score"] * aggregated[comp_id]["count"] + row["vote"] * row["count"]) / (aggregated[comp_id]["count"] + row["count"])
             aggregated[comp_id]["count"] += row["count"]
         else:
-            aggregated[comp_id] = {"score": row["score"], "count": int(row["count"])}
+            aggregated[comp_id] = {"score": row["vote"], "count": int(row["count"])}
     
     return aggregated
 
@@ -345,21 +349,27 @@ def extract_policy_code(component_text: str) -> str:
     match = re.search(r"\b[A-Z0-9_]{3,}\b", cleaned_text)  # Match words with uppercase letters, numbers, and underscores
     return match.group(0) if match else ""
 
-def build_personalization_store(summary: str, user_id: str, batch_id: str, threshold: int = 3) -> dict:
+def build_personalization_store(summary: str, user_id: str, batch_id: str, feedback_df: pd.DataFrame, threshold: int = 3) -> dict:
     components = breakdown_text(summary)
-    agg = aggregate_feedback(user_id)
+    agg = aggregate_feedback(user_id, feedback_df)
     store = {}
+    print(f"Inside build_personalization_store : \nFeedback : {feedback_df.head()} \nAgg : {agg}")
+    
+    print("Starting extraction")
     for idx, comp in enumerate(components):
+        print(f"- Component : [{idx}] : {comp}\n")
         code = extract_policy_code(comp)
         if code:
-            fb = agg.get(idx, {"score": 1, "count": 0})
+            fb = agg.get(idx, {"vote": 1, "count": 0})
             if fb["count"] >= threshold:
                 if fb["score"] < 0.3:
                     store[code] = "omit"
                 elif fb["score"] > 0.7:
                     store[code] = "elaborate"
-                    
-    global personalization_df
+    
+    print(f"Store : {store}")
+    
+    personalization_df = pd.DataFrame(columns=["user_id", "batch_id", "policy_code", "action"])
     for code, action in store.items():
         mask = ((personalization_df["user_id"] == user_id) &
                 (personalization_df["batch_id"] == batch_id) &
@@ -372,6 +382,9 @@ def build_personalization_store(summary: str, user_id: str, batch_id: str, thres
             personalization_df = pd.concat([personalization_df, new_row], ignore_index=True)
         else:
             personalization_df.loc[mask, "action"] = action
+            
+    print(f"Personalization DF : {personalization_df}")        
+    
     return store
 
 def build_personalized_user_prompt(policy_check_data: list, personal_store: dict) -> str:
@@ -391,8 +404,8 @@ def build_personalized_user_prompt(policy_check_data: list, personal_store: dict
         prompt += block
     return prompt
 
-def build_final_prompt(system_prompt_policy: str, policy_check_data: list, summary: str, user_id: str, batch_id: str) -> str:
-    personal_store = build_personalization_store(summary, user_id, batch_id)
+def build_final_prompt(system_prompt_policy: str, policy_check_data: list, summary: str, user_id: str, batch_id: str, feedback_df: pd.DataFrame) -> str:
+    personal_store = build_personalization_store(summary, user_id, batch_id, feedback_df)
     user_prompt = build_personalized_user_prompt(policy_check_data, personal_store)
     feedback_section = ("\nPersonalization Rules:\n" +
                         "\n".join([f"{k}: {v}" for k, v in personal_store.items()])
@@ -414,18 +427,20 @@ Please generate a final summary that strictly adheres to the System Instructions
 # Final Summary Modules
 # ------------------------------------------
 
-def generate_final_summary(system_prompt_policy: str, policy_check_data: list, feasibility_report_json_data, user_id: str, batch_id: str) -> str:
-    global personalization_df
-    
-    # Check if personalizations exist for the user
-    has_personalization = not personalization_df[(personalization_df["user_id"] == user_id)].empty
-    
-    if has_personalization:
+def generate_final_summary(system_prompt_policy: str, policy_check_data: list, feasibility_report_json_data, user_id: str, batch_id: str, feedback:str = None) -> str:
+    if feedback is not None:
+        feedback_df = pd.read_json(json.dumps(feedback), orient="records")
+        
         # Build the modified prompt using personalization rules
         policy_check_summary = generate_policy_summary(policy_check_data)
-        modified_policy_summary_prompt = build_final_prompt(system_prompt_policy, policy_check_data, str(policy_check_summary), user_id, batch_id)
+        
+        print(f"Summary : {policy_check_summary}\nBreakdown summary : {breakdown_text(str(policy_check_summary))}")
+        
+        modified_policy_summary_prompt = build_final_prompt(system_prompt_policy, policy_check_data, str(policy_check_summary), user_id, batch_id, feedback_df)
         policy_summary = llm.complete(modified_policy_summary_prompt)
         feasibility_summary = generate_feasibility_summary(feasibility_report_json_data)
+        
+        print(f"--> Prompt : {modified_policy_summary_prompt}\n\n")
         
         final_summary = append_feasibility_to_policy(policy_summary, feasibility_summary)
         
@@ -459,10 +474,10 @@ def main_loop():
                 }
                 for policy in details["policy_check_data"]
             ]
-            
             feasibility_report = details["feasibility_report"]
-            
-            account_summary = generate_final_summary(system_prompt_policy, policy_check_data, feasibility_report, account_id, current_batch_id)
+            feedback = details["feedback"] if "feedback" in details else None
+
+            account_summary = generate_final_summary(system_prompt_policy, policy_check_data, feasibility_report, account_id, current_batch_id, feedback)
 
             summaries[account_id][account_opt_map_id] = {
                 "summary": account_summary,
