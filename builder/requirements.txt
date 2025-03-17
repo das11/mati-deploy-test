@@ -19,3 +19,7 @@ fastparquet
 llama-index-postprocessor-cohere-rerank
 promptlayer
 llama-index-callbacks-promptlayer
+langchain-community
+huggingface_hub==0.24.5
+openpyxl
+spacy
