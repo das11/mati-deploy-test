@@ -467,3 +467,5 @@ def main_loop():
             summaries[account_id][account_opt_map_id] = {
                 "summary": account_summary,
             }
+    
+    return summaries
