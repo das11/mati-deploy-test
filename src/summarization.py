@@ -325,11 +325,11 @@ def record_feedback(summary: str, user_id: str, component_id: int, vote: int):
 
 def aggregate_feedback(account_id: str, feedback_df: pd.DataFrame) -> dict:
     """Aggregate feedback across all sessions for a user."""
-    df = feedback_df[feedback_df["user_id"] == account_id]
+    df = feedback_df[feedback_df["userId"] == account_id]
     
     aggregated = {}
     for _, row in df.iterrows():
-        comp_id = int(row["component_id"])
+        comp_id = int(row["componentId"])
         if comp_id in aggregated:
             # Aggregate score & count
             aggregated[comp_id]["score"] = (aggregated[comp_id]["score"] * aggregated[comp_id]["count"] + row["vote"] * row["count"]) / (aggregated[comp_id]["count"] + row["count"])
@@ -350,13 +350,13 @@ def extract_policy_code(component_text: str) -> str:
     return match.group(0) if match else ""
 
 def build_personalization_store(summary: str, user_id: str, batch_id: str, feedback_df: pd.DataFrame, threshold: int = 3) -> dict:
-    components = breakdown_text(summary)
+    components = feedback_df["componentText"].tolist()
     agg = aggregate_feedback(user_id, feedback_df)
     store = {}
     print(f"Inside build_personalization_store : \nFeedback : {feedback_df.head()} \nAgg : {agg}")
     
     print("Starting extraction")
-    for idx, comp in enumerate(components):
+    for idx, comp in zip(feedback_df["componentId"], feedback_df["componentText"]):
         print(f"- Component : [{idx}] : {comp}\n")
         code = extract_policy_code(comp)
         if code:
@@ -434,9 +434,9 @@ def generate_final_summary(system_prompt_policy: str, policy_check_data: list, f
         # Build the modified prompt using personalization rules
         policy_check_summary = generate_policy_summary(policy_check_data)
         
-        print(f"Summary : {policy_check_summary}\nBreakdown summary : {breakdown_text(str(policy_check_summary))}")
+        print(f"Summary : {policy_check_summary}\n")
         
-        modified_policy_summary_prompt = build_final_prompt(system_prompt_policy, policy_check_data, str(policy_check_summary), user_id, batch_id, feedback_df)
+        modified_policy_summary_prompt = build_final_prompt(system_prompt_policy, policy_check_data, str(feedback_df.loc[0, "summaryText"]), user_id, batch_id, feedback_df)
         policy_summary = llm.complete(modified_policy_summary_prompt)
         feasibility_summary = generate_feasibility_summary(feasibility_report_json_data)
         
