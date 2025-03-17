@@ -266,8 +266,8 @@ def summarization_flow(job_input):
     summarization.set_payload(job_input["summarization"])
     summarization.set_llm(llm)
     
-    summarization.main_loop()
-    return True
+    summaries = summarization.main_loop()
+    return summaries
     
     
 
