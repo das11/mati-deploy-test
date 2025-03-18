@@ -128,7 +128,7 @@ You are a portfolio compliance analyst. Summarize policy check results in this s
 3. **Good Standing**: Collapse "SUCCESS" policies and add concise brief of policy good standing.
 
 Rules:
-- Use bold/emoji for highlights.
+- Use bold and emojis for highlights.
 - Include numbers from `output_data` (e.g., "$1,788.94").
 - Include policy_code where applicable.
 - For tax breaches, explain tax liability impact.
@@ -139,11 +139,12 @@ Rules:
 system_prompt_feasibility = """
 You are a portfolio compliance analyst. Summarize the following feasibility report failed constraints.
 Follow these rules : 
-- Highlight the key issues, risk factors, and potential implications.
-- Summary should be very brief.
+- Summarize the failed constraints.
 - Present the summary in a concise, bullet-point format using bold text and emojis where appropriate.
-- If there are no critical issues, mention that the portfolio constraints are fully feasible.
+- If there are no critical issues, mention that the portfolio feasibility report constraints are fully feasible.
 """
+
+# - Highlight the key issues, risk factors, and potential implications.
 
 # Policy Check data
 def build_user_prompt_policy(policy_check_data):
