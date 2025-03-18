@@ -263,10 +263,10 @@ def summarization_flow(job_input):
     
     summarization.set_pinecone_index(pinecone_index)
     summarization.set_embeddings_model(embeddings)
-    summarization.set_payload(job_input["summarization"])
+    # summarization.set_payload(job_input["summarization"])
     summarization.set_llm(llm)
     
-    summaries = summarization.main_loop()
+    summaries = summarization.main_loop(job_input["summarization"])
     return summaries
     
     

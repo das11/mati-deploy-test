@@ -14,7 +14,7 @@ import pprint
 # Globals Declaration
 # ------------------------------------------
 embeddings_model = None
-payload = None
+# payload = None
 llm = None
 pinecone_index = None
 summaries = {}
@@ -23,9 +23,9 @@ def set_embeddings_model(model):
     global embeddings_model
     embeddings_model = model
 
-def set_payload(data):
-    global payload
-    payload = data
+# def set_payload(data):
+#     global payload
+#     payload = data
     
 def set_llm(object):
     global llm
@@ -456,7 +456,7 @@ def generate_final_summary(system_prompt_policy: str, policy_check_data: list, f
 # Main Loop
 # ------------------------------------------
 
-def main_loop():
+def main_loop(payload):
     global current_batch_id, summaries
     current_batch_id = str(uuid.uuid4())
     parsed_data = parse_payload_data_json(payload)
