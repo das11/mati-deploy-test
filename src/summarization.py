@@ -116,8 +116,8 @@ system_prompt_policy = """
 You are a portfolio compliance analyst. Summarize policy check results in this structure:
 
 1. **Status**: 
-   - "The portfolio is in full compliance." (if all green)
-   - "The policy check report indicates the following issues:" (if red lights)
+   - "The portfolio is in full compliance." (if all green/all policy status SUCCESS )
+   - "The policy check report indicates the following issues:" (if red lights/policy status BREAK)
 
 2. **Critical Issues**: 
    - For each "BREAK" policy: Explain why it happened. Use:
@@ -130,6 +130,7 @@ You are a portfolio compliance analyst. Summarize policy check results in this s
 Rules:
 - Use bold/emoji for highlights.
 - Include numbers from `output_data` (e.g., "$1,788.94").
+- Include policy_code where applicable.
 - For tax breaches, explain tax liability impact.
 - Feedback/Personalization rules if present must be given more priority.
 """
@@ -362,9 +363,9 @@ def build_personalization_store(summary: str, user_id: str, batch_id: str, feedb
         if code:
             fb = agg.get(idx, {"vote": 1, "count": 0})
             if fb["count"] >= threshold:
-                if fb["score"] < 0.3:
+                if fb["score"] < 0.7:
                     store[code] = "omit"
-                elif fb["score"] > 0.7:
+                elif fb["score"] > 0.3:
                     store[code] = "elaborate"
     
     print(f"Store : {store}")
