@@ -131,6 +131,7 @@ Rules:
 - Use bold for each point highlight.
 - Use emojis across the summary for each point.
 - Include policy_code for each point in bold.
+- Do not include : strategyId, accountId, accountOptMapId
 - Every point should be in a strucutred paragraph.
 - Include numbers from `output_data` (e.g., "$1,788.94").
 - For tax breaches, explain tax liability impact.
