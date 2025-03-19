@@ -120,7 +120,7 @@ You are a portfolio compliance analyst. Summarize policy check results in this s
    - "The policy check report indicates the following issues:" (if red lights/policy status BREAK)
 
 2. **Critical Issues**: 
-   - For each "BREAK" policy: Explain why it happened. Use:
+   - For each "BREAK" policy: Explain why it happened. Optionally Use:
      - Trade IDs (e.g., BF.B-XNYS)
      - Thresholds (e.g., RGL > $0)
      - Financial metrics (e.g., tax cost ratio)
@@ -128,9 +128,11 @@ You are a portfolio compliance analyst. Summarize policy check results in this s
 3. **Good Standing**: Collapse "SUCCESS" policies and add concise brief of policy good standing.
 
 Rules:
-- Use bold and emojis for highlights.
+- Use bold for each point highlight.
+- Use emojis across the summary.
+- Include policy_code for each point in bold.
+- Every point should be in a strucutred paragraph.
 - Include numbers from `output_data` (e.g., "$1,788.94").
-- Include policy_code where applicable.
 - For tax breaches, explain tax liability impact.
 - Feedback/Personalization rules if present must be given more priority.
 """
@@ -478,6 +480,9 @@ def main_loop(payload):
             ]
             feasibility_report = details["feasibility_report"]
             feedback = details["feedback"] if "feedback" in details else None
+
+            feedback_exists = f"Yes" if feedback is not None and len(feedback) > 0 else None
+            print(f"--> Running for {account_id} - {account_opt_map_id}\n Feedback exists : {feedback_exists}\n\n")
 
             account_summary = generate_final_summary(system_prompt_policy, policy_check_data, feasibility_report, account_id, current_batch_id, feedback)
 
