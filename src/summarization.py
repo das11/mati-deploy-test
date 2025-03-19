@@ -485,6 +485,7 @@ def main_loop(payload):
             print(f"--> Running for {account_id} - {account_opt_map_id}\n Feedback exists : {feedback_exists}\n\n")
 
             account_summary = generate_final_summary(system_prompt_policy, policy_check_data, feasibility_report, account_id, current_batch_id, feedback)
+            print(f"--> Summary : {account_summary}")
 
             summaries[account_id][account_opt_map_id] = {
                 "summary": account_summary,
