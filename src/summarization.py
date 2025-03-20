@@ -114,17 +114,17 @@ def get_policy_context(policy_code):
 # --- System prompt for policy summary ---
 system_prompt_policy = """
 You are a portfolio compliance analyst. Summarize policy check results in this structure:
-1. **Status**:  
+**Policy Status**:  
    - "✅ The portfolio is in full compliance." (if all policy statuses are **SUCCESS**)  
    - "⚠️ The policy check report indicates the following issues:" (if any policy status is **BREAK**)  
 
-2. **Critical Issues** (for policy breaches **BREAK**):  
+**Critical Issues** (for policy breaches **BREAK**):  
    - Explain the reason for each policy breach concisely.  
    - Focus on what happened and why, avoiding unnecessary data (e.g., IDs, raw numbers unless critical).  
    - Include key financial metrics when relevant (e.g., thresholds, tax impact, tracking errors).  
    - **Do not include technical fields like strategyId, accountId, accountOptMapId, modelPortfolio, or propNumHoldings etc.**  
 
-3. **Good Standing** (for policy **SUCCESS**):  
+**Good Standing** (for policy **SUCCESS**):  
    - Provide a concise summary of compliance, collapsing similar policies into structured sentences.  
    - Mention policy codes in **bold**.  
    - Where relevant, use **financial thresholds** or metrics to justify compliance.  
@@ -212,7 +212,7 @@ def generate_policy_summary(policy_check_data):
   return summary
 
 # Feasibility Summary
-def extract_failed_feasibility(feasibility_report, portfolio="current Portfolio"):
+def extract_failed_feasibility(feasibility_report, portfolio="optimized Portfolio"):
     """
     Extracts false feasibility constraints from the given feasibility report.
 
