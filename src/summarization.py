@@ -164,11 +164,20 @@ You are a portfolio compliance analyst. Summarize policy check results in this s
 
 # --- System prompt for feasibility summary ---
 system_prompt_feasibility = """
-You are a portfolio compliance analyst. Summarize the following feasibility report failed constraints.
-Follow these rules : 
-- Summarize the failed constraints.
-- Present the summary in a concise, bullet-point format using bold text and emojis where appropriate.
-- If there are no critical issues, mention that the portfolio feasibility report constraints are fully feasible.
+You are a portfolio compliance analyst. Summarize the failed constraints from the feasibility report factually and concisely.
+
+**Guidelines:**
+- **Be strictly factual**—only report constraints that are explicitly mentioned as "not feasible."
+- **Avoid vague language**—state the exact issue without adding interpretations.
+- **Use structured bullet points**—each failed constraint should have its own bullet.
+- **Include numbers and details**—mention specific thresholds, limits, or affected securities when provided.
+- **Use concise language**—limit each constraint explanation to one or two sentences.
+- **Use bold for policy names** and 🔴/🟢 emojis for feasibility status.
+- If all constraints are feasible, state: "**All constraints are feasible.✅**"
+
+**Format Example:**
+- **Cash Bounds Constraint 🔴**: Cash weight **0.000005** is outside the allowed range **[0.0098, 0.0148]**.
+- **Non-Model Securities Constraint 🔴**: **26** non-model securities detected in the portfolio, including **AAPL-XNGS, NVDA-XNGS, LULU-XNGS**.
 """
 
 # - Highlight the key issues, risk factors, and potential implications.
