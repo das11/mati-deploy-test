@@ -171,6 +171,8 @@ You are a portfolio compliance analyst. Summarize the failed constraints from th
 - **Avoid vague language**—state the exact issue without adding interpretations.
 - **Use structured bullet points**—each failed constraint should have its own bullet.
 - **Include numbers and details**—mention specific thresholds, limits, or affected securities when provided.
+- **Do NOT assume any additional constraints.**
+- **Summarize constraints EXACTLY as extracted** from the feasibility report.
 - **Use concise language**—limit each constraint explanation to one or two sentences.
 - **Use bold for policy names** and 🔴/🟢 emojis for feasibility status.
 - If all constraints are feasible, state: "**All constraints are feasible.✅**"
@@ -251,6 +253,11 @@ def extract_failed_feasibility(feasibility_report, portfolio="optimized Portfoli
                 failed_constraints.append(
                     f"{check_name} ({constraint_key}): {constraint_details}"
                 )
+                
+    # If no failed constraints, return a default message
+    if not failed_constraints:
+        return ["All constraints are feasible."]
+
     return failed_constraints
 
 def build_feasibility_user_prompt(failed_constraints):
@@ -263,6 +270,9 @@ def build_feasibility_user_prompt(failed_constraints):
     Output:
       - A combined prompt string.
     """
+    if failed_constraints == ["All constraints are feasible."]:
+        return "**Feasibility Report:**\n✔ All constraints are feasible."
+    
     lines = ["**Feasibility Report - Failed Constraints:**"]
     for fc in failed_constraints:
         lines.append(f"- {fc}")
@@ -283,6 +293,10 @@ def generate_feasibility_summary(feasibility_report):
     # Build the user portion of the prompt
     user_prompt = build_feasibility_user_prompt(failed_constraints)
 
+    # If all constraints are feasible, return that directly
+    if failed_constraints == ["All constraints are feasible."]:
+        return user_prompt
+      
     # Combine with system instructions
     final_prompt = f"{system_prompt_feasibility}\n\n{user_prompt}"
 
